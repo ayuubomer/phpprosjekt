@@ -1,5 +1,6 @@
 <?php
 /* Lag en innloggingsside for en nettside ved hjelp av PHP og HTML. Siden skal inneholde et skjema der brukeren kan skrive inn brukernavn og passord. Når skjemaet sendes inn, skal PHP-koden validere at begge feltene er fylt ut. Hvis ett eller begge feltene er tomme, skal en feilmelding vises. Hvis begge feltene er fylt ut, skal en velkomstmelding vises med brukernavnet. */
+/*Ingen bruker? Registrer deg her: register.php */
 $error = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
@@ -48,6 +49,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div>
                 <button type="submit">Logg inn</button>
             </div>
+            <div>
+                <p>Ingen konto? <a href="registrering.php">Registrer deg her</a></p>
         </form>
     </div>
 </body>
