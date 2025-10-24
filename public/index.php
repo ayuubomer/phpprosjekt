@@ -37,7 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php if (!empty($error)): ?>
             <div class="error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
-        <form method="post" action="">
+         <!-- Denne formen skal ta oss til ChatBot.php siden -->
+        <form method="post" action="ChatBot.php">
             <div>
                 <label for="username">Brukernavn:</label>
                 <input type="text" id="username" name="username" required>
@@ -46,9 +47,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="password">Passord:</label>
                 <input type="password" id="password" name="password" required>
             </div>
+             <!-- Login knappen skal ta oss til ChatBot.php siden -->
             <div>
                 <button type="submit">Logg inn</button>
             </div>
+
             <div>
                 <p>Ingen konto? <a href="registrering.php">Registrer deg her</a></p>
         </form>
