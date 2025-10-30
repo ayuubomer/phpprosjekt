@@ -1,0 +1,10 @@
+# Ignore all environment / secret files
+.env
+.env.*
+*.env
+*.env.*
+# secrets
+.env
+.env.*
+*.env
+*.env.*
