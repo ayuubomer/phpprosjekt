@@ -8,3 +8,10 @@
 .env.*
 *.env
 *.env.*
+
+
+/vendor
+
+# local db/artifacts (if using SQLite)
+db/*.sqlite
+db/*.db
