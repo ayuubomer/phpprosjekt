@@ -1,57 +1,76 @@
 <?php
-/*Denne siden fungerer som en enkel frontend til en chatbot. Den skal inneholde et skjema der brukeren kan skrive inn et spørsmål eller en melding til chatboten. Når skjemaet sendes inn, skal PHP-koden behandle meldingen og vise et forhåndsdefinert svar fra chatboten.*/
-$response = '';
-$userMessage = '';
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Use null coalescing to avoid "Undefined array key" warnings
-    $userMessage = trim($_POST['message'] ?? '');
+// public/ChatBot.php
+require __DIR__ . '/../vendor/autoload.php';
 
-    if (!empty($userMessage)) {
-        // Forhåndsdefinert svar fra chatboten
-        $response = "Chatbot svarer: Takk for meldingen din!";
-    } else {
-        $response = "Vennligst skriv inn en melding.";
-    }
+use Dotenv\Dotenv;
+
+header('Content-Type: application/json; charset=utf-8');
+
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+$apiKey = $_ENV['GEMINI_API_KEY'] ?? null; // unified name
+if (!$apiKey) {
+  http_response_code(500);
+  echo json_encode(['error' => 'API key missing']);
+  exit;
 }
-?>
-<!DOCTYPE html>
-<html lang="no">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .chat-form { max-width: 500px; margin: auto; padding: 1em; border: 1px solid #ccc; border-radius: 1em; }
-        .chat-form div { margin-bottom: 1em; }
-        .chat-form label { margin-bottom: .5em; color: #333333; }
-        .chat-form textarea { border: 1px solid #ccc; padding: .5em; width: 100%; height: 100px; }
-        .chat-form button { padding: 0.7em; color: #fff; background-color: #28a745; border: none; border-radius: .3em; cursor: pointer; }
-        .chat-form button:hover { background-color: #218838; }
-        .response { margin-top: 1em; padding: 1em; border: 1px solid #ccc; border-radius: .5em; background-color: #f8f9fa; }
-    </style>
-</head>
-<body>
-    <div class="chat-form">
-        <h2>Chat med vår Chatbot</h2>
-        <form method="post" action="">
-            <div>
-                <label for="message">Skriv din melding:</label>
-                <textarea id="message" name="message" required></textarea>
-            </div>
-            <div>
-                <button type="submit">Send</button>
-            </div>
-        </form>
-        <?php if (!empty($response)): ?>
-            <div class="response"><?php echo htmlspecialchars($response); ?></div>
-        <?php endif; ?>
-    </div>
-    <div style="text-align: center; margin-top: 20px;">
-        <a href="index.php">Tilbake til innlogging</a>
-    </div>
-    
-</body>
-</html>
 
+// Optional health check without breaking JSON:
+if (isset($_GET['health'])) {
+  echo json_encode(['status' => 'ok', 'hasKey' => true]);
+  exit;
+}
 
+// Read input (JSON/POST/GET)
+$raw = file_get_contents('php://input') ?: '';
+$in  = json_decode($raw, true);
+$userMessage = trim($in['message'] ?? ($_POST['message'] ?? ($_GET['message'] ?? '')));
+
+if ($userMessage === '') {
+  echo json_encode(['error' => 'Provide "message" via JSON/POST/GET']);
+  exit;
+}
+
+$model = 'gemini-2.0-flash';
+$payload = [
+  'systemInstruction' => [
+    'parts' => [[ 'text' => 'You are a concise, helpful assistant. Keep answers short unless asked.' ]]
+  ],
+  'contents' => [[ 'parts' => [[ 'text' => $userMessage ]]]],
+  'generationConfig' => [
+    'temperature' => 0.7,
+    'maxOutputTokens' => 512
+  ],
+];
+
+$url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+$ch = curl_init($url);
+curl_setopt_array($ch, [
+  CURLOPT_POST => true,
+  CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+  CURLOPT_POSTFIELDS => json_encode($payload),
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_TIMEOUT => 30,
+]);
+$response = curl_exec($ch);
+$err = curl_error($ch);
+curl_close($ch);
+
+if ($err) {
+  echo json_encode(['error' => "cURL error: $err"]);
+  exit;
+}
+
+$data = json_decode($response, true);
+$text = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+
+if (!$text) {
+  echo json_encode([
+    'error' => 'No text returned (maybe blocked by safety filters).',
+    'debug' => $data
+  ]);
+  exit;
+}
+
+echo json_encode(['reply' => $text]);
