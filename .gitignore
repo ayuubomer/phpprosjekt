@@ -1,17 +1,13 @@
-# Ignore all environment / secret files
+# Ignore environment / secret files
 .env
 .env.*
 *.env
 *.env.*
-# secrets
-.env
-.env.*
-*.env
-*.env.*
+!.env.example  # Allow the example env file
 
+# Ignore dependencies
+/vendor/
 
-/vendor
-
-# local db/artifacts (if using SQLite)
-db/*.sqlite
-db/*.db
+# Ignore local databases
+/db/*.sqlite
+/db/*.db
