@@ -1,5 +1,4 @@
 <?php
-// public/ChatBot.php
 require __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
@@ -9,24 +8,24 @@ header('Content-Type: application/json; charset=utf-8');
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
-$apiKey = $_ENV['GEMINI_API_KEY'] ?? null; // unified name
+$apiKey = $_ENV['GEMINI_API_KEY'] ?? null; // importer API key fra .env filen
 if (!$apiKey) {
   http_response_code(500);
   echo json_encode(['error' => 'API key missing']);
   exit;
 }
 
-// Optional health check without breaking JSON:
 if (isset($_GET['health'])) {
   echo json_encode(['status' => 'ok', 'hasKey' => true]);
   exit;
 }
 
-// Read input (JSON/POST/GET)
+// Leser input fra JSON/POST/GET
 $raw = file_get_contents('php://input') ?: '';
 $in  = json_decode($raw, true);
 $userMessage = trim($in['message'] ?? ($_POST['message'] ?? ($_GET['message'] ?? '')));
 
+// sjekker om meldingen er tom
 if ($userMessage === '') {
   echo json_encode(['error' => 'Provide "message" via JSON/POST/GET']);
   exit;
@@ -44,7 +43,7 @@ $payload = [
   ],
 ];
 
-$url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+$url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}"; // URL for API
 $ch = curl_init($url);
 curl_setopt_array($ch, [
   CURLOPT_POST => true,
@@ -53,7 +52,7 @@ curl_setopt_array($ch, [
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_TIMEOUT => 30,
 ]);
-$response = curl_exec($ch);
+$response = curl_exec($ch); // sender request til API
 $err = curl_error($ch);
 curl_close($ch);
 
@@ -62,7 +61,7 @@ if ($err) {
   exit;
 }
 
-$data = json_decode($response, true);
+$data = json_decode($response, true); // dekoder response fra API
 $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
 
 if (!$text) {
@@ -73,4 +72,4 @@ if (!$text) {
   exit;
 }
 
-echo json_encode(['reply' => $text]);
+echo json_encode(['reply' => $text]); // sender response til klienten

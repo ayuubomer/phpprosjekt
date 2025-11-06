@@ -1,11 +1,12 @@
 <?php
-require __DIR__ . '/../src/auth.php';
-require __DIR__ . '/../src/database.php';
+require __DIR__ . '/../src/auth.php'; // importer auth.php
+require __DIR__ . '/../src/database.php'; // importer database.php
 
 auth_start();
 $already = current_user();
 $err = '';
 
+// sjekker om metode er POST og validerer input
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $email = trim($_POST['email'] ?? '');
   $password = $_POST['password'] ?? '';
