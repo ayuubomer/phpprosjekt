@@ -54,17 +54,30 @@ $user = current_user();
       color: var(--muted);
       font-size: 1rem;
     }
-    .logout-btn {
-      background: transparent;
-      color: var(--accent);
-      border: 1px solid rgba(107,140,255,0.14);
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-weight: 600;
+    /* Primary button style for ALL buttons */
+    .btn, 
+    button[type="submit"],
+    #clearBtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: #03203b;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 15px;
+      font-weight: 700;
+      font-size: 1.05rem;
       cursor: pointer;
-      transition: background .14s;
+      box-shadow: 0 8px 24px rgba(91,111,255,0.18);
+      transition: transform .1s;
     }
-    .logout-btn:hover { background: rgba(107,140,255,0.08); }
+
+    .btn:active, 
+    button[type="submit"]:active,
+    #clearBtn:active {
+      transform: translateY(1px);
+    }
 
     .chat-log {
       min-height: 320px;
@@ -125,19 +138,6 @@ $user = current_user();
       border-color: var(--accent);
       box-shadow: 0 6px 18px rgba(107,140,255,0.12);
     }
-    button[type="submit"] {
-      background: linear-gradient(90deg,var(--accent),var(--accent-2));
-      color: #03203b;
-      border: 0;
-      border-radius: 10px;
-      padding: 0 22px;
-      font-weight: 700;
-      font-size: 1.05rem;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(91,111,255,0.18);
-      transition: background .13s;
-    }
-    button[type="submit"]:active { transform: translateY(1px); }
     .chatbot-logo {
       display: inline-flex;
       align-items: center;
@@ -165,13 +165,16 @@ $user = current_user();
       <div class="chat-header">
         <div class="user">
           <span class="chatbot-logo">
-            <img src="img/gymbot.png" alt="Logo" style="width:100px;height:100%;object-fit:cover;border-radius:50%;">
+            <img src="img/gymbot.png" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
           </span>
           Logged in as <?= htmlspecialchars($user['email']) ?>
         </div>
-        <form method="post" action="logout.php" style="margin:0;">
-          <button type="submit" class="logout-btn">Log out</button>
-        </form>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="clearBtn" type="button" class="btn">Clear Chat</button>
+          <form method="post" action="logout.php" style="margin:0;display:inline;">
+            <button type="submit" class="btn">Log out</button>
+          </form>
+        </div>
       </div>
       <div id="log" class="chat-log" aria-live="polite"></div>
       <div class="chat-form-wrap">
@@ -213,6 +216,34 @@ $user = current_user();
         append('bot', data.reply || '(no reply)');
       } catch (err) {
         append('error', String(err.message || err));
+      }
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', async () => {
+      try {
+        console.log('Clearing chat history...');
+        
+        const res = await fetch('ChatBot.php?action=clear', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        
+        const data = await res.json();
+        console.log('Clear response:', data);
+        
+        if (data.ok) {
+          log.innerHTML = '';
+          alert(`Cleared ${data.deleted} messages from database`);
+        } else {
+          alert('Clear failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        console.error('Clear error:', err);
+        alert('Failed to clear chat: ' + err.message);
       }
     });
   </script>
