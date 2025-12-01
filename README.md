@@ -3,18 +3,6 @@
 
 A group project built with **PHP**, **MySQL**, and **Gemini API**, featuring secure authentication and a chatbot interface.
 Developed and tested locally with **XAMPP**.
-
----
-
-## 🚀 Features
-
-* 🔐 User authentication (sign-up, login, logout)
-* 🧠 Google Gemini API chatbot integration
-* 💾 MySQL database for persistent user data
-* ⚙️ `.env` configuration for secrets and DB settings
-* 🧹 Git-safe setup with `.env.example`
-* 💬 Ready for chat history and streaming message upgrades
-
 ---
 
 ## 🧩 Project Structure
@@ -109,7 +97,7 @@ CREATE TABLE IF NOT EXISTS messages (
 
 ---
 
-## 🔐 5️⃣ Configure Environment Variables
+## Configure Environment Variables
 
 Copy `.env.example` → rename it to `.env`, then edit:
 
@@ -122,7 +110,7 @@ DB_PASS=StrongPass_123!
 
 ---
 
-## ▶️ 6️⃣ Run the Project
+## Run the Project
 
 1. Open **XAMPP Control Panel**
 
@@ -141,7 +129,7 @@ DB_PASS=StrongPass_123!
 
 ---
 
-## 👥 Team Collaboration
+## Team Collaboration
 
 Each team member must:
 
@@ -155,7 +143,7 @@ The `.env` file is **never shared or committed**.
 
 ---
 
-## 🧹 Git Ignore Setup
+## Git Ignore Setup
 
 Your `.gitignore` file should include:
 
@@ -174,18 +162,7 @@ Your `.gitignore` file should include:
 /db/*.db
 ```
 
----
-
-## 🧩 Next Steps (Optional Enhancements)
-
-* 💬 **Chat History:** store and display user conversations
-* 🔁 **Clear Chat Button:** simple AJAX endpoint to clear messages
-* ⚡ **Streaming Replies:** use Gemini’s `streamGenerateContent`
-* 📘 **Admin Dashboard:** view all users or messages (future)
-
----
-
-## 🧑‍💻 Authors
+## Authors
 
 Group project — IS-216 - Chatbot
 Developed using PHP, MySQL, and the Google Gemini API.
